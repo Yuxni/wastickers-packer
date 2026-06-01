@@ -1,6 +1,9 @@
+
+
+
 <p align="center">
   <br>
-  <b>Turn sticker images into <code>.wastickers</code> files for WhatsApp</b>
+  <b>Packs sticker images into <code>.wastickers</code> files for WhatsApp</b>
 </p>
 
 <p align="center">
@@ -14,7 +17,7 @@
 
 ```bash
 pip install .
-whatsappsticker path/to/stickers -o ./packs
+wastickers-packer path/to/stickers -o ./packs
 ```
 
 Transfer the `.wastickers` to your phone, open it with **Sticker Maker Studio** (`iOS`) or **WAStickerApps** (Android), and tap **Add to WhatsApp**. Done.
@@ -50,9 +53,13 @@ pip install .
 
 While moving from an `Android` device to an `IOS` one,  I encountered this stupid issue using `MoveToIOS` (as the process is not annoying and error prune as is) - among other things, **`WhatsappStickers` do not transfer** in the move to the new phone for some reason!
 
-now here me out, im a bit of sticker hoarder, and even after filtering them out I was still left with 300, not in packs or organized of course
+on android atleast it is possible to access them via 
+`Internal Storage/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Stickers/
+`
 
-so I started researching a way to just dump them on my new phone, and I came to the sad conclusion that the there is no real way to batch up the process - and the sadder conclusion - i am the only human with that much stickers that reached this issue
+now here me out, im a bit of sticker hoarder, and even after filtering & copying them out of I was still left with 300, not in packs nor organized of course
+
+so I started researching a way to just dump & install them on my new phone, and I came to the sad conclusion that the there is no real way to batch up the process - and the sadder conclusion - i am the only human with that much stickers that reached this issue
 
 **so I decided to streamline this [as much as i can](#how-it-works)**
 
@@ -88,7 +95,7 @@ hopefully this serves someone
 ### 🗂️ Flat folder — all images become one pack
 
 ```
-whatsappsticker stickers/ -o ./packs
+wastickers-packer stickers/ -o ./packs
 ```
 
 Over 30 images? Packs split automatically ("My Pack 1", "My Pack 2", …).  
@@ -111,7 +118,7 @@ stickers/
 ```
 
 ```
-whatsappsticker stickers/ -o ./packs
+wastickers-packer stickers/ -o ./packs
 ```
 
 Each subfolder is a named pack. Max 30 per subfolder (error if exceeded).  
@@ -121,7 +128,7 @@ Below 3? Padded automatically.
 ### 📊 HTML preview
 
 ```
-whatsappsticker path/to/stickers -o ./packs --report
+wastickers-packer path/to/stickers -o ./packs --report
 ```
 
 ---

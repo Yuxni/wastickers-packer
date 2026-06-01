@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
-from whatsappsticker.scan import is_animated, sanitize, scan, scan_subfolders
+from wastickers_packer.scan import is_animated, sanitize, scan, scan_subfolders
 
 from .conftest import mock_path
 
@@ -13,7 +13,7 @@ from .conftest import mock_path
 # ---------------------------------------------------------------------------
 
 class TestIsAnimated:
-    @patch("whatsappsticker.scan.Image.open")
+    @patch("wastickers_packer.scan.Image.open")
     def test_true_when_is_animated_set(self, mock_open) -> None:
         mock_img = MagicMock()
         mock_img.__enter__.return_value = mock_img
@@ -22,7 +22,7 @@ class TestIsAnimated:
 
         assert is_animated(mock_path("anim.webp"))
 
-    @patch("whatsappsticker.scan.Image.open")
+    @patch("wastickers_packer.scan.Image.open")
     def test_false_when_not_animated(self, mock_open) -> None:
         mock_img = MagicMock()
         mock_img.__enter__.return_value = mock_img
@@ -31,7 +31,7 @@ class TestIsAnimated:
 
         assert not is_animated(mock_path("static.png"))
 
-    @patch("whatsappsticker.scan.Image.open")
+    @patch("wastickers_packer.scan.Image.open")
     def test_false_when_attr_missing(self, mock_open) -> None:
         mock_img = MagicMock(spec=["__enter__", "__exit__"])
         mock_img.__enter__.return_value = mock_img
@@ -124,7 +124,7 @@ class TestScan:
 
 
 class TestScanSubfolders:
-    @patch("whatsappsticker.scan.scan")
+    @patch("wastickers_packer.scan.scan")
     def test_returns_sorted_subfolders(self, mock_scan) -> None:
         root = MagicMock(spec=Path)
         root.iterdir.return_value = [
@@ -140,7 +140,7 @@ class TestScanSubfolders:
 
         assert [name for name, _ in entries] == ["animals", "food"]
 
-    @patch("whatsappsticker.scan.scan")
+    @patch("wastickers_packer.scan.scan")
     def test_skips_subfolders_without_images(self, mock_scan) -> None:
         root = MagicMock(spec=Path)
         root.iterdir.return_value = [
@@ -157,7 +157,7 @@ class TestScanSubfolders:
         assert len(entries) == 1
         assert entries[0][0] == "animals"
 
-    @patch("whatsappsticker.scan.scan")
+    @patch("wastickers_packer.scan.scan")
     def test_skips_dot_prefixed_subfolders(self, mock_scan) -> None:
         root = MagicMock(spec=Path)
         root.iterdir.return_value = [

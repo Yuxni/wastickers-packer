@@ -8,9 +8,9 @@ from .conftest import mock_path
 
 class TestCli:
     @patch("pathlib.Path.is_dir", return_value=True)
-    @patch("whatsappsticker.cli.plan_packs")
-    @patch("whatsappsticker.cli.create_pack")
-    @patch("whatsappsticker.cli.pack_to_wastickers")
+    @patch("wastickers_packer.cli.plan_packs")
+    @patch("wastickers_packer.cli.create_pack")
+    @patch("wastickers_packer.cli.pack_to_wastickers")
     @patch("pathlib.Path.mkdir")
     @patch("pathlib.Path.write_bytes")
     def test_successful_run(
@@ -20,9 +20,9 @@ class TestCli:
         mock_create.return_value = MagicMock(id="my_pack", name="My Pack")
         mock_p2w.return_value = b"fake zip content"
 
-        old_argv, sys.argv = sys.argv, ["whatsappsticker", "/fake/input", "-o", "/fake/output"]
+        old_argv, sys.argv = sys.argv, ["wastickers-packer", "/fake/input", "-o", "/fake/output"]
         try:
-            from whatsappsticker.cli import cli
+            from wastickers_packer.cli import cli
             cli()
             mock_plan.assert_called_once()
             mock_create.assert_called_once()
@@ -31,10 +31,10 @@ class TestCli:
             sys.argv = old_argv
 
     @patch("pathlib.Path.is_dir", return_value=True)
-    @patch("whatsappsticker.cli.plan_packs")
-    @patch("whatsappsticker.cli.create_pack")
-    @patch("whatsappsticker.cli.pack_to_wastickers")
-    @patch("whatsappsticker.cli.write_index")
+    @patch("wastickers_packer.cli.plan_packs")
+    @patch("wastickers_packer.cli.create_pack")
+    @patch("wastickers_packer.cli.pack_to_wastickers")
+    @patch("wastickers_packer.cli.write_index")
     @patch("pathlib.Path.mkdir")
     @patch("pathlib.Path.write_bytes")
     def test_report_flag_generates_html(
@@ -44,18 +44,18 @@ class TestCli:
         mock_create.return_value = MagicMock(id="pack", name="Pack")
         mock_p2w.return_value = b"zip"
 
-        old_argv, sys.argv = sys.argv, ["whatsappsticker", "/fake/input", "-o", "/fake/output", "--report"]
+        old_argv, sys.argv = sys.argv, ["wastickers-packer", "/fake/input", "-o", "/fake/output", "--report"]
         try:
-            from whatsappsticker.cli import cli
+            from wastickers_packer.cli import cli
             cli()
             mock_idx.assert_called_once()
         finally:
             sys.argv = old_argv
 
     @patch("pathlib.Path.is_dir", return_value=True)
-    @patch("whatsappsticker.cli.plan_packs")
-    @patch("whatsappsticker.cli.create_pack")
-    @patch("whatsappsticker.cli.pack_to_wastickers")
+    @patch("wastickers_packer.cli.plan_packs")
+    @patch("wastickers_packer.cli.create_pack")
+    @patch("wastickers_packer.cli.pack_to_wastickers")
     @patch("pathlib.Path.mkdir")
     @patch("pathlib.Path.write_bytes")
     def test_publisher_flag_is_passed_through(
@@ -66,11 +66,11 @@ class TestCli:
         mock_p2w.return_value = b"zip"
 
         old_argv, sys.argv = sys.argv, [
-            "whatsappsticker", "/fake/input", "-o", "/fake/output",
+            "wastickers-packer", "/fake/input", "-o", "/fake/output",
             "--publisher", "CustomPub",
         ]
         try:
-            from whatsappsticker.cli import cli
+            from wastickers_packer.cli import cli
             cli()
             _, kwargs = mock_create.call_args
             assert kwargs["publisher"] == "CustomPub"
@@ -79,9 +79,9 @@ class TestCli:
 
     @patch("pathlib.Path.is_dir", return_value=False)
     def test_exits_when_input_missing(self, mock_is_dir) -> None:
-        old_argv, sys.argv = sys.argv, ["whatsappsticker", "/nonexistent/path"]
+        old_argv, sys.argv = sys.argv, ["wastickers-packer", "/nonexistent/path"]
         try:
-            from whatsappsticker.cli import cli
+            from wastickers_packer.cli import cli
             with pytest.raises(SystemExit) as exc:
                 cli()
             assert exc.value.code == 1
@@ -90,9 +90,9 @@ class TestCli:
 
     @patch("pathlib.Path.is_dir", return_value=False)
     def test_exits_when_input_is_file(self, mock_is_dir) -> None:
-        old_argv, sys.argv = sys.argv, ["whatsappsticker", "/fake/file.txt"]
+        old_argv, sys.argv = sys.argv, ["wastickers-packer", "/fake/file.txt"]
         try:
-            from whatsappsticker.cli import cli
+            from wastickers_packer.cli import cli
             with pytest.raises(SystemExit) as exc:
                 cli()
             assert exc.value.code == 1

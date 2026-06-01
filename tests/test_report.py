@@ -3,8 +3,8 @@ from unittest.mock import MagicMock, call
 
 from PIL import Image
 
-from whatsappsticker.report import write_index
-from whatsappsticker.wastickers import ProcessedPack
+from wastickers_packer.report import write_index
+from wastickers_packer.wastickers import ProcessedPack
 
 
 def _tray_bytes() -> bytes:

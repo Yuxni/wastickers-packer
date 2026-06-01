@@ -21,7 +21,7 @@ def _setup_logging() -> None:
 def cli() -> None:
     import argparse
     ap = argparse.ArgumentParser(
-        prog="whatsappsticker",
+        prog="wastickers-packer",
         description="Pack sticker images into .wastickers files for WhatsApp.",
     )
     ap.add_argument("input", help="Folder with sticker images or subdirectories")

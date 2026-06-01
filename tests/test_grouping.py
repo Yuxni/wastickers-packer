@@ -3,12 +3,12 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
-from whatsappsticker.grouping import (
+from wastickers_packer.grouping import (
     _display_name,
     _split_flat,
     plan_packs,
 )
-from whatsappsticker.exceptions import InputError
+from wastickers_packer.exceptions import InputError
 
 from .conftest import mock_path
 
@@ -62,7 +62,7 @@ class TestSplitFlat:
 
 
 class TestPlanPacks:
-    @patch("whatsappsticker.grouping.scan_subfolders")
+    @patch("wastickers_packer.grouping.scan_subfolders")
     def test_subfolder_mode(self, mock_subfolders) -> None:
         mock_subfolders.return_value = [
             ("animals", [mock_path("cat.png")] * 4),
@@ -74,8 +74,8 @@ class TestPlanPacks:
         assert set(packs) == {"Animals", "Food"}
         assert len(packs["Animals"]) == 4
 
-    @patch("whatsappsticker.grouping.scan_subfolders")
-    @patch("whatsappsticker.grouping.scan")
+    @patch("wastickers_packer.grouping.scan_subfolders")
+    @patch("wastickers_packer.grouping.scan")
     def test_flat_mode_without_name_uses_folder_name(
         self, mock_scan, mock_subfolders
     ) -> None:
@@ -89,8 +89,8 @@ class TestPlanPacks:
 
         assert "My Folder" in packs
 
-    @patch("whatsappsticker.grouping.scan_subfolders")
-    @patch("whatsappsticker.grouping.scan")
+    @patch("wastickers_packer.grouping.scan_subfolders")
+    @patch("wastickers_packer.grouping.scan")
     def test_flat_mode_with_custom_name(
         self, mock_scan, mock_subfolders
     ) -> None:
@@ -101,8 +101,8 @@ class TestPlanPacks:
 
         assert "Custom Name" in packs
 
-    @patch("whatsappsticker.grouping.scan_subfolders")
-    @patch("whatsappsticker.grouping.scan")
+    @patch("wastickers_packer.grouping.scan_subfolders")
+    @patch("wastickers_packer.grouping.scan")
     def test_raises_on_empty_input(
         self, mock_scan, mock_subfolders
     ) -> None:
@@ -112,7 +112,7 @@ class TestPlanPacks:
         with pytest.raises(InputError):
             plan_packs(MagicMock(spec=Path))
 
-    @patch("whatsappsticker.grouping.scan_subfolders")
+    @patch("wastickers_packer.grouping.scan_subfolders")
     def test_subfolder_raises_when_over_max(self, mock_subfolders) -> None:
         mock_subfolders.return_value = [
             ("Many", _paths(31)),
@@ -121,7 +121,7 @@ class TestPlanPacks:
         with pytest.raises(InputError, match="maximum"):
             plan_packs(MagicMock(spec=Path))
 
-    @patch("whatsappsticker.grouping.scan_subfolders")
+    @patch("wastickers_packer.grouping.scan_subfolders")
     def test_subfolder_pads_below_minimum(self, mock_subfolders) -> None:
         mock_subfolders.return_value = [
             ("Tiny", _paths(2)),
@@ -132,7 +132,7 @@ class TestPlanPacks:
         assert "Tiny" in packs
         assert len(packs["Tiny"]) == 3
 
-    @patch("whatsappsticker.grouping.scan_subfolders")
+    @patch("wastickers_packer.grouping.scan_subfolders")
     def test_subfolder_allows_mixed_content(self, mock_subfolders) -> None:
         """Mixed static/animated in a subfolder is now allowed."""
         mock_subfolders.return_value = [

@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, PropertyMock, patch
 import pytest
 from PIL import Image
 
-from whatsappsticker.wastickers import (
+from wastickers_packer.wastickers import (
     ProcessedPack,
     create_pack,
     pack_to_wastickers,
@@ -13,7 +13,7 @@ from whatsappsticker.wastickers import (
     _image_to_png,
     _image_to_bytes,
 )
-from whatsappsticker.exceptions import ImageConversionError
+from wastickers_packer.exceptions import ImageConversionError
 
 from .conftest import mock_path
 
@@ -92,7 +92,7 @@ class TestCreatePack:
         assert img.size == (96, 96)
 
     @patch("PIL.Image.open")
-    @patch("whatsappsticker.wastickers._animated_to_webp")
+    @patch("wastickers_packer.wastickers._animated_to_webp")
     def test_animated_path_uses_animated_to_webp(
         self, mock_anim, mock_img_open, sample_image
     ) -> None:
