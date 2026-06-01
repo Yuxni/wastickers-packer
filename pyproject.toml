@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "whatsappsticker"
+version = "0.1.0"
+description = "Convert sticker images into .wastickers files for WhatsApp"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "whatsappsticker contributors"},
+]
+keywords = ["whatsapp", "sticker", "wastickers"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Multimedia :: Graphics :: Converters",
+]
+dependencies = [
+    "Pillow>=9.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yuval/whatsappsticker"
+Source = "https://github.com/yuval/whatsappsticker"
+
+[project.scripts]
+whatsappsticker = "whatsappsticker.cli:cli"
+
+[tool.setuptools.packages.find]
+include = ["whatsappsticker*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
