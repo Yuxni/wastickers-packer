@@ -32,8 +32,8 @@ Transfer the `.wastickers` to your phone, open it with **Sticker Maker Studio** 
 - [Why a helper app is required (iOS) & Dead End Research](#why-a-helper-app-is-required-ios--dead-end-research)
 - [Usage](#usage)
 - [Options](#options)
-- [WhatsApp limitations](#whatsapp-limitations-and-how-we-handle-them)
-- [Output structure](#output-structure)
+- [WhatsApp Limitations](#whatsapp-limitations-and-how-we-handle-them)
+- [Output Structure](#output-structure)
 - [License](#license)
 
 ---
@@ -173,7 +173,7 @@ wastickers-packer path/to/stickers -o ./packs --report
 
 ---
 
-## Output structure
+## Output Structure
 
 ```
 packs/
