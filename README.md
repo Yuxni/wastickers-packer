@@ -29,7 +29,7 @@ Transfer the `.wastickers` to your phone, open it with **Sticker Maker Studio** 
 - [Installation](#installation)
 - [Features](#features)
 - [Why and for Who?](#why-and-for-who)
-- [Why a helper app is required (iOS) \& Dead End Research](#why-a-helper-app-is-required-ios--dead-end-research)
+- [Why a helper app is required (iOS) & Dead End Research](#why-a-helper-app-is-required-ios--dead-end-research)
 - [Usage](#usage)
 - [Options](#options)
 - [WhatsApp limitations](#whatsapp-limitations-and-how-we-handle-them)
@@ -158,7 +158,7 @@ wastickers-packer path/to/stickers -o ./packs --report
 
 ---
 
-## [WhatsApp limitations](https://faq.whatsapp.com/1056840314992666) (and how we handle them)
+## [WhatsApp Limitations](https://faq.whatsapp.com/1056840314992666) (and how we handle them)
 
 | Limitation                          | Our approach                                      |
 |-------------------------------------|---------------------------------------------------|
