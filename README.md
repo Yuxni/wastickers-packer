@@ -24,6 +24,20 @@ Transfer the `.wastickers` to your phone, open it with **Sticker Maker Studio** 
 
 ---
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Features](#features)
+- [Why and for Who?](#why-and-for-who)
+- [Why a helper app is required (iOS) \& Dead End Research](#why-a-helper-app-is-required-ios--dead-end-research)
+- [Usage](#usage)
+- [Options](#options)
+- [WhatsApp limitations](#whatsapp-limitations-and-how-we-handle-them)
+- [Output structure](#output-structure)
+- [License](#license)
+
+---
+
 
 
 ## Installation
