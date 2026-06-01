@@ -27,7 +27,6 @@ def test_display_name(raw: str, expected: str) -> None:
     assert _display_name(raw) == expected
 
 
-
 def _paths(n: int) -> list:
     return [mock_path(f"img_{i:02d}.png") for i in range(n)]
 
@@ -45,20 +44,26 @@ class TestSplitFlat:
         assert len(result["Big Pack 1"]) == 30
         assert len(result["Big Pack 2"]) == 5
 
-    def test_raises_when_below_minimum(self) -> None:
-        with pytest.raises(InputError, match="at least 3"):
-            _split_flat(_paths(2), "Too Few")
-
     def test_exact_minimum_succeeds(self) -> None:
         assert len(_split_flat(_paths(3), "Exact")["Exact"]) == 3
 
+    def test_pads_two_to_three(self) -> None:
+        result = _split_flat(_paths(2), "Small")
+        assert len(result["Small"]) == 3
+        # third entry is duplicate of first (cycling: 2 % 2 == 0)
+        assert result["Small"][2].name == "img_00.png"
+
+    def test_pads_one_to_three(self) -> None:
+        result = _split_flat(_paths(1), "Single")
+        assert len(result["Single"]) == 3
+
+    def test_empty_returns_empty(self) -> None:
+        assert _split_flat([], "Empty") == {}
 
 
 class TestPlanPacks:
-    @patch("whatsappsticker.grouping.is_animated")
     @patch("whatsappsticker.grouping.scan_subfolders")
-    def test_subfolder_mode(self, mock_subfolders, mock_anim) -> None:
-        mock_anim.return_value = False
+    def test_subfolder_mode(self, mock_subfolders) -> None:
         mock_subfolders.return_value = [
             ("animals", [mock_path("cat.png")] * 4),
             ("food", [mock_path("pizza.png")] * 4),
@@ -69,13 +74,11 @@ class TestPlanPacks:
         assert set(packs) == {"Animals", "Food"}
         assert len(packs["Animals"]) == 4
 
-    @patch("whatsappsticker.grouping.is_animated")
     @patch("whatsappsticker.grouping.scan_subfolders")
     @patch("whatsappsticker.grouping.scan")
     def test_flat_mode_without_name_uses_folder_name(
-        self, mock_scan, mock_subfolders, mock_anim
+        self, mock_scan, mock_subfolders
     ) -> None:
-        mock_anim.return_value = False
         mock_subfolders.return_value = []
         mock_scan.return_value = _paths(4)
 
@@ -86,13 +89,11 @@ class TestPlanPacks:
 
         assert "My Folder" in packs
 
-    @patch("whatsappsticker.grouping.is_animated")
     @patch("whatsappsticker.grouping.scan_subfolders")
     @patch("whatsappsticker.grouping.scan")
     def test_flat_mode_with_custom_name(
-        self, mock_scan, mock_subfolders, mock_anim
+        self, mock_scan, mock_subfolders
     ) -> None:
-        mock_anim.return_value = False
         mock_subfolders.return_value = []
         mock_scan.return_value = _paths(4)
 
@@ -100,73 +101,46 @@ class TestPlanPacks:
 
         assert "Custom Name" in packs
 
-    @patch("whatsappsticker.grouping.is_animated")
     @patch("whatsappsticker.grouping.scan_subfolders")
     @patch("whatsappsticker.grouping.scan")
     def test_raises_on_empty_input(
-        self, mock_scan, mock_subfolders, mock_anim
+        self, mock_scan, mock_subfolders
     ) -> None:
-        mock_anim.return_value = False
         mock_subfolders.return_value = []
         mock_scan.return_value = []
 
         with pytest.raises(InputError):
             plan_packs(MagicMock(spec=Path))
 
-    @patch("whatsappsticker.grouping.is_animated")
     @patch("whatsappsticker.grouping.scan_subfolders")
-    def test_subfolder_validates_count(self, mock_subfolders, mock_anim) -> None:
-        mock_anim.return_value = False
+    def test_subfolder_raises_when_over_max(self, mock_subfolders) -> None:
         mock_subfolders.return_value = [
-            ("toofew", _paths(2)),
+            ("Many", _paths(31)),
         ]
 
-        with pytest.raises(InputError, match="toofew"):
+        with pytest.raises(InputError, match="maximum"):
             plan_packs(MagicMock(spec=Path))
 
-    @patch("whatsappsticker.grouping.is_animated")
     @patch("whatsappsticker.grouping.scan_subfolders")
-    @patch("whatsappsticker.grouping.scan")
-    def test_flat_mode_splits_mixed_packs(
-        self, mock_scan, mock_subfolders, mock_anim
-    ) -> None:
-        mock_subfolders.return_value = []
-        paths = _paths(6)
-        mock_scan.return_value = paths
-        mock_anim.side_effect = lambda p: p.name in ("img_00.png", "img_01.png", "img_02.png")
+    def test_subfolder_pads_below_minimum(self, mock_subfolders) -> None:
+        mock_subfolders.return_value = [
+            ("Tiny", _paths(2)),
+        ]
 
-        packs = plan_packs(MagicMock(spec=Path), name="Mixed")
+        packs = plan_packs(MagicMock(spec=Path))
 
-        assert "Mixed Animated" in packs
-        assert "Mixed Static" in packs
-        assert len(packs["Mixed Animated"]) == 3
-        assert len(packs["Mixed Static"]) == 3
+        assert "Tiny" in packs
+        assert len(packs["Tiny"]) == 3
 
-    @patch("whatsappsticker.grouping.is_animated")
     @patch("whatsappsticker.grouping.scan_subfolders")
-    def test_subfolder_mode_raises_on_mixed_pack(
-        self, mock_subfolders, mock_anim
-    ) -> None:
+    def test_subfolder_allows_mixed_content(self, mock_subfolders) -> None:
+        """Mixed static/animated in a subfolder is now allowed."""
         mock_subfolders.return_value = [
             ("Mixed", [mock_path("a.webp"), mock_path("b.webp"),
                        mock_path("c.png"), mock_path("d.png")]),
         ]
-        mock_anim.side_effect = lambda p: p.name in ("a.webp", "b.webp")
-
-        with pytest.raises(InputError, match="contains both static"):
-            plan_packs(MagicMock(spec=Path))
-
-    @patch("whatsappsticker.grouping.is_animated")
-    @patch("whatsappsticker.grouping.scan_subfolders")
-    def test_subfolder_all_animated_preserves_name(
-        self, mock_subfolders, mock_anim
-    ) -> None:
-        mock_subfolders.return_value = [
-            ("Dogs", [mock_path("a.webp")] * 4),
-        ]
-        mock_anim.return_value = True
 
         packs = plan_packs(MagicMock(spec=Path))
 
-        assert "Dogs" in packs
-        assert len(packs["Dogs"]) == 4
+        assert "Mixed" in packs
+        assert len(packs["Mixed"]) == 4

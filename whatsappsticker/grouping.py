@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from .scan import is_animated, scan, scan_subfolders
+from .scan import scan, scan_subfolders
 from .exceptions import InputError
 
 logger = logging.getLogger(__name__)
@@ -16,15 +16,28 @@ def _display_name(raw: str) -> str:
     return raw.replace("_", " ").replace("-", " ").title()
 
 
+def _pad(images: List[Path]) -> List[Path]:
+    """Pad *images* to MIN_PER_PACK by cycling existing stickers."""
+    count = len(images)
+    if count >= MIN_PER_PACK or count == 0:
+        return images
+    padded = list(images)
+    while len(padded) < MIN_PER_PACK:
+        padded.append(images[len(padded) % count])
+    logger.warning("Padded from %d to %d stickers by duplicating", count, len(padded))
+    return padded
+
+
 def _split_flat(images: List[Path], base_name: str) -> Dict[str, List[Path]]:
     """Split images into packs of MAX_PER_PACK."""
+    images = _pad(images)
+    if not images:
+        return {}
     count = len(images)
-    if count < MIN_PER_PACK:
-        raise InputError(f"Need at least {MIN_PER_PACK} stickers, found {count}")
-    
+
     if count < MAX_PER_PACK:
         return {base_name: images}
-    
+
     packs: Dict[str, List[Path]] = {}
     for i in range(0, count, MAX_PER_PACK):
         chunk = images[i:i + MAX_PER_PACK]
@@ -39,20 +52,13 @@ def plan_packs(input_dir: Path, name: Optional[str] = None) -> Dict[str, List[Pa
     if subfolders:
         packs: Dict[str, List[Path]] = {}
         for sub_name, images in subfolders:
-            if not (MIN_PER_PACK <= len(images) <= MAX_PER_PACK):
+            if len(images) > MAX_PER_PACK:
                 raise InputError(
                     f"Subfolder '{sub_name}' has {len(images)} sticker(s); "
-                    f"must have between {MIN_PER_PACK} and {MAX_PER_PACK}"
+                    f"maximum per pack is {MAX_PER_PACK}"
                 )
             pack_name = _display_name(sub_name)
-            animated_count = sum(1 for p in images if is_animated(p))
-            if 0 < animated_count < len(images):
-                raise InputError(
-                    f"Subfolder '{sub_name}' contains both static and "
-                    f"animated stickers. Please separate them into "
-                    f"different subfolders."
-                )
-            packs[pack_name] = images
+            packs.update(_split_flat(images, pack_name))
         return packs
 
     images = scan(input_dir)
@@ -61,18 +67,4 @@ def plan_packs(input_dir: Path, name: Optional[str] = None) -> Dict[str, List[Pa
 
     logger.info("Found %d images", len(images))
     pack_name = name if name else _display_name(input_dir.name)
-
-    animated = [p for p in images if is_animated(p)]
-    static = [p for p in images if not is_animated(p)]
-
-    packs: Dict[str, List[Path]] = {}
-    
-    if animated and static:
-
-        packs.update(_split_flat(animated, pack_name + " Animated"))
-        packs.update(_split_flat(static, pack_name + " Static"))
-    elif animated:
-        packs.update(_split_flat(animated, pack_name))
-    else:
-        packs.update(_split_flat(static, pack_name))
-    return packs
+    return _split_flat(images, pack_name)
