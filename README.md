@@ -144,14 +144,16 @@ wastickers-packer path/to/stickers -o ./packs --report
 
 ---
 
-## WhatsApp limitations (and how we handle them)
+## [WhatsApp limitations](https://faq.whatsapp.com/1056840314992666) (and how we handle them)
 
 | Limitation                          | Our approach                                      |
 |-------------------------------------|---------------------------------------------------|
 | 3–30 stickers per pack              | Below 3 → pad. Above 30 → split (flat mode).     |
 | ≤100 KB per static sticker          | Quality-tuned WebP export hits the target.        |
 | ≤500 KB per animated sticker        | Same, with the higher animated limit.             |
-| No mixing static & animated         | Says not Allowed — iOS app accepts mixed packs.            |
+| Frame duration 10–500 ms (>8ms)     | Clamped automatically; 0ms → 100ms.               |
+| Total animation ≤10 s               | Scaled proportionally if exceeded.                |
+| No mixing static & animated         | Says not Allowed — iOS app accepts mixed packs.   |
 | 512×512 pixels                      | Auto-resized and centre-cropped.                  |
 | 96×96 PNG tray icon                 | Generated from the first sticker.                 |
 

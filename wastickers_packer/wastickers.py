@@ -16,6 +16,9 @@ STICKER_SIZE = (512, 512)
 TRAY_SIZE = (96, 96)
 MAX_STICKER_KB = 100
 MAX_ANIMATED_STICKER_KB = 500
+MIN_FRAME_DURATION_MS = 10
+MAX_FRAME_DURATION_MS = 500
+MAX_TOTAL_ANIMATION_MS = 10_000
 
 
 @dataclass
@@ -41,7 +44,21 @@ def _animated_to_webp(img: Image.Image) -> bytes:
         y = (STICKER_SIZE[1] - frame.size[1]) // 2
         canvas.paste(frame, (x, y), frame)
         frames.append(canvas)
-        durations.append(img.info.get("duration", 100))
+        dur = img.info.get("duration", 100) or 100
+        if dur > MAX_FRAME_DURATION_MS:
+            logger.warning("Clamping frame %d duration from %dms to %dms", i, dur, MAX_FRAME_DURATION_MS)
+            dur = MAX_FRAME_DURATION_MS
+        if dur < MIN_FRAME_DURATION_MS:
+            logger.warning("Raising frame %d duration from %dms to %dms", i, dur, MIN_FRAME_DURATION_MS)
+            dur = MIN_FRAME_DURATION_MS
+        durations.append(dur)
+
+    total_dur = sum(durations)
+    if total_dur > MAX_TOTAL_ANIMATION_MS:
+        scale = MAX_TOTAL_ANIMATION_MS / total_dur
+        logger.warning("Total animation %dms exceeds %dms, scaling durations by %.2f",
+                       total_dur, MAX_TOTAL_ANIMATION_MS, scale)
+        durations = [max(8, int(d * scale)) for d in durations]
 
     quality = 85
     while quality >= 10:

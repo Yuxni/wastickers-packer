@@ -1,3 +1,4 @@
+import struct
 import zipfile
 from io import BytesIO
 from unittest.mock import MagicMock, PropertyMock, patch
@@ -9,9 +10,13 @@ from wastickers_packer.wastickers import (
     ProcessedPack,
     create_pack,
     pack_to_wastickers,
+    _animated_to_webp,
     _sticker_to_webp,
     _image_to_png,
     _image_to_bytes,
+    MIN_FRAME_DURATION_MS,
+    MAX_FRAME_DURATION_MS,
+    MAX_TOTAL_ANIMATION_MS,
 )
 from wastickers_packer.exceptions import ImageConversionError
 
@@ -112,6 +117,71 @@ class TestCreatePack:
         assert pack.stickers[0] == b"animated webp bytes"
         mock_anim.assert_called_once_with(mock_img)
 
+
+
+def _webp_frame_durations(data: bytes):
+    pos = 12
+    durs = []
+    while pos < len(data) - 8:
+        cid = data[pos:pos+4]
+        sz = struct.unpack('<I', data[pos+4:pos+8])[0]
+        if cid == b'ANMF':
+            d = struct.unpack('<I', data[pos+20:pos+23] + b'\x00')[0]
+            durs.append(d)
+        pos += 8 + sz
+        if sz % 2:
+            pos += 1
+    return durs
+
+
+def _animated_gif(durations, size=(64, 64)):
+    frames = []
+    for i in range(len(durations)):
+        r = (i * 50) % 256
+        frames.append(Image.new("RGBA", size, (r, 128, 255, 255)))
+    buf = BytesIO()
+    frames[0].save(buf, "GIF", save_all=True, append_images=frames[1:],
+                   duration=list(durations), loop=0)
+    buf.seek(0)
+    return Image.open(buf)
+
+
+class TestAnimatedToWebp:
+    def test_passes_through_valid_durations(self):
+        img = _animated_gif([100, 100, 100])
+        result = _animated_to_webp(img)
+        durs = _webp_frame_durations(result)
+        assert durs == [100, 100, 100]
+
+    def test_zero_duration_becomes_default(self):
+        img = _animated_gif([0, 100, 100])
+        result = _animated_to_webp(img)
+        durs = _webp_frame_durations(result)
+        assert durs == [100, 100, 100]
+
+    def test_clamps_long_duration(self):
+        img = _animated_gif([2000, 100, 100])
+        result = _animated_to_webp(img)
+        durs = _webp_frame_durations(result)
+        assert all(d <= MAX_FRAME_DURATION_MS for d in durs)
+        assert durs[0] == MAX_FRAME_DURATION_MS
+
+    def test_raises_short_duration_to_minimum(self):
+        img = _animated_gif([1, 100, 100])
+        result = _animated_to_webp(img)
+        durs = _webp_frame_durations(result)
+        assert all(d >= MIN_FRAME_DURATION_MS for d in durs)
+
+    def test_scales_total_animation(self):
+        many_frames = [500] * 25  # 12.5s total
+        img = _animated_gif(many_frames)
+        result = _animated_to_webp(img)
+        durs = _webp_frame_durations(result)
+        assert sum(durs) <= MAX_TOTAL_ANIMATION_MS
+
+    def test_single_frame_is_not_animated(self):
+        img = _animated_gif([100])
+        assert not getattr(img, "is_animated", False)
 
 
 def _png_bytes(img: Image.Image) -> bytes:
