@@ -118,9 +118,12 @@ def create_pack(name: str, images: List[Path],
     first_raw: Optional[Image.Image] = None
 
     for idx, img_path in enumerate(images, 1):
+        logger.info("  sticker_%02d: %s", idx, img_path.name)
         raw = Image.open(img_path)
 
         if getattr(raw, "is_animated", False):
+            n = getattr(raw, "n_frames", 0)
+            logger.info("         (%d frames, encoding...)", n)
             anim_bytes = _animated_to_webp(raw)
             sticker_imgs.append(anim_bytes)
             if first_raw is None:
@@ -131,7 +134,6 @@ def create_pack(name: str, images: List[Path],
             sticker_imgs.append(_sticker_to_webp(raw_rgba))
             if first_raw is None:
                 first_raw = raw_rgba
-        logger.info("  sticker_%02d.webp", idx)
 
     if not sticker_imgs or first_raw is None:
         raise ImageConversionError(f"No valid stickers converted for '{name}'")
