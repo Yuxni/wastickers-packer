@@ -7,8 +7,14 @@ from PIL import Image
 class _MockPath:
     """Minimal Path-like object with controllable properties — no real I/O."""
 
-    def __init__(self, name: str, suffix: str = None, parent: str = "/fake",
-                 is_file: bool = True, is_dir: bool = False):
+    def __init__(
+        self,
+        name: str,
+        suffix: str = None,
+        parent: str = "/fake",
+        is_file: bool = True,
+        is_dir: bool = False,
+    ):
         self.name = name
         self.suffix = suffix if suffix is not None else Path(name).suffix
         self._is_file = is_file

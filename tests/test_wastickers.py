@@ -6,19 +6,19 @@ from unittest.mock import MagicMock, PropertyMock, patch
 import pytest
 from PIL import Image
 
+from wastickers_packer.exceptions import ImageConversionError
 from wastickers_packer.wastickers import (
-    ProcessedPack,
-    create_pack,
-    pack_to_wastickers,
-    _animated_to_webp,
-    _sticker_to_webp,
-    _image_to_png,
-    _image_to_bytes,
-    MIN_FRAME_DURATION_MS,
     MAX_FRAME_DURATION_MS,
     MAX_TOTAL_ANIMATION_MS,
+    MIN_FRAME_DURATION_MS,
+    ProcessedPack,
+    _animated_to_webp,
+    _image_to_bytes,
+    _image_to_png,
+    _sticker_to_webp,
+    create_pack,
+    pack_to_wastickers,
 )
-from wastickers_packer.exceptions import ImageConversionError
 
 from .conftest import mock_path
 
@@ -28,11 +28,14 @@ _real_image_open = Image.open
 
 def _smart_img_open(sample_image: Image.Image):
     """Side-effect for Image.open mock: file paths return stub, BytesIO delegates."""
+
     def side_effect(fp, *args, **kwargs):
         if isinstance(fp, BytesIO):
             return _real_image_open(fp, *args, **kwargs)
         return sample_image
+
     return side_effect
+
 
 class TestImageConversion:
     def test_sticker_to_webp_returns_512x512_webp_bytes(self, sample_image) -> None:
@@ -55,6 +58,7 @@ class TestImageConversion:
         data = _image_to_bytes(sample_image, "PNG")
         assert isinstance(data, bytes)
         assert len(data) > 0
+
 
 class TestCreatePack:
     @patch("PIL.Image.open")
@@ -118,15 +122,14 @@ class TestCreatePack:
         mock_anim.assert_called_once_with(mock_img)
 
 
-
 def _webp_frame_durations(data: bytes):
     pos = 12
     durs = []
     while pos < len(data) - 8:
-        cid = data[pos:pos+4]
-        sz = struct.unpack('<I', data[pos+4:pos+8])[0]
-        if cid == b'ANMF':
-            d = struct.unpack('<I', data[pos+20:pos+23] + b'\x00')[0]
+        cid = data[pos : pos + 4]
+        sz = struct.unpack("<I", data[pos + 4 : pos + 8])[0]
+        if cid == b"ANMF":
+            d = struct.unpack("<I", data[pos + 20 : pos + 23] + b"\x00")[0]
             durs.append(d)
         pos += 8 + sz
         if sz % 2:
@@ -140,8 +143,9 @@ def _animated_gif(durations, size=(64, 64)):
         r = (i * 50) % 256
         frames.append(Image.new("RGBA", size, (r, 128, 255, 255)))
     buf = BytesIO()
-    frames[0].save(buf, "GIF", save_all=True, append_images=frames[1:],
-                   duration=list(durations), loop=0)
+    frames[0].save(
+        buf, "GIF", save_all=True, append_images=frames[1:], duration=list(durations), loop=0
+    )
     buf.seek(0)
     return Image.open(buf)
 
@@ -199,26 +203,36 @@ def _webp_bytes(img: Image.Image) -> bytes:
 class TestPackToWastickers:
     def test_returns_non_empty_bytes(self, sample_image) -> None:
         data = pack_to_wastickers(
-            ProcessedPack("test", "Test", "Pub", [_webp_bytes(sample_image)],
-                          _png_bytes(sample_image))
+            ProcessedPack(
+                "test", "Test", "Pub", [_webp_bytes(sample_image)], _png_bytes(sample_image)
+            )
         )
         assert isinstance(data, bytes)
         assert len(data) > 0
 
     def test_zip_structure(self, sample_image) -> None:
         data = pack_to_wastickers(
-            ProcessedPack("test", "Test", "Pub", [_webp_bytes(sample_image)],
-                          _png_bytes(sample_image))
+            ProcessedPack(
+                "test", "Test", "Pub", [_webp_bytes(sample_image)], _png_bytes(sample_image)
+            )
         )
         with zipfile.ZipFile(BytesIO(data)) as zf:
             assert set(zf.namelist()) == {
-                "author.txt", "title.txt", "tray.png", "sticker_01.webp",
+                "author.txt",
+                "title.txt",
+                "tray.png",
+                "sticker_01.webp",
             }
 
     def test_zip_metadata(self, sample_image) -> None:
         data = pack_to_wastickers(
-            ProcessedPack("test", "MyPack", "MyPublisher",
-                          [_webp_bytes(sample_image)], _png_bytes(sample_image))
+            ProcessedPack(
+                "test",
+                "MyPack",
+                "MyPublisher",
+                [_webp_bytes(sample_image)],
+                _png_bytes(sample_image),
+            )
         )
         with zipfile.ZipFile(BytesIO(data)) as zf:
             assert zf.read("author.txt").decode() == "MyPublisher"
@@ -227,9 +241,9 @@ class TestPackToWastickers:
     def test_round_trip_images_are_512x512_webp(self, sample_image) -> None:
         sticker_bytes = _sticker_to_webp(sample_image)
         data = pack_to_wastickers(
-            ProcessedPack("test", "Test", "Pub",
-                          [sticker_bytes, sticker_bytes],
-                          _png_bytes(sample_image))
+            ProcessedPack(
+                "test", "Test", "Pub", [sticker_bytes, sticker_bytes], _png_bytes(sample_image)
+            )
         )
         with zipfile.ZipFile(BytesIO(data)) as zf:
             for i in (1, 2):

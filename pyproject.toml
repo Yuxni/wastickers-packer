@@ -5,17 +5,16 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "wastickers-packer"
 version = "0.1.0"
-description = "Convert sticker images into .wastickers files for WhatsApp"
+description = "Batch-pack sticker images into .wastickers files for WhatsApp — auto-resize, split, pad, and generate installable packs"
 readme = "README.md"
 requires-python = ">=3.8"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
     {name = "yuxni"},
 ]
-keywords = ["whatsapp", "sticker", "wastickers"]
+keywords = ["whatsapp", "sticker", "wastickers", "whatsapp-stickers", "sticker-pack", "cli", "webp"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Topic :: Multimedia :: Graphics :: Converters",
 ]
 dependencies = [
@@ -23,15 +22,33 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yuval/wastickers-packer"
-Source = "https://github.com/yuval/wastickers-packer"
+Homepage = "https://github.com/yuxni/wastickers-packer"
+Source = "https://github.com/yuxni/wastickers-packer"
 
 [project.scripts]
 wastickers-packer = "wastickers_packer.cli:cli"
 
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.4",
+]
+
 [tool.setuptools.packages.find]
 include = ["wastickers_packer*"]
+
+[tool.ruff]
+target-version = "py38"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.ruff.format]
+quote-style = "double"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+addopts = "--cov=wastickers_packer --cov-report=term-missing"

@@ -1,0 +1,3 @@
+- release version to pypi via twine
+- create cicd workflows
+- creata blog post

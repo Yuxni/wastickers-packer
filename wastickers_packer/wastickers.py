@@ -24,11 +24,13 @@ MAX_TOTAL_ANIMATION_MS = 10_000
 @dataclass
 class ProcessedPack:
     """Pack after image conversion, kept in memory."""
+
     id: str
     name: str
     publisher: str
     stickers: List[bytes]
     tray: bytes
+
 
 def _animated_to_webp(img: Image.Image) -> bytes:
     n_frames = getattr(img, "n_frames", 1)
@@ -46,18 +48,22 @@ def _animated_to_webp(img: Image.Image) -> bytes:
         frames.append(canvas)
         dur = img.info.get("duration", 100) or 100
         if dur > MAX_FRAME_DURATION_MS:
-            logger.warning("Clamping frame %d duration from %dms to %dms", i, dur, MAX_FRAME_DURATION_MS)
+            logger.warning("Clamping frame %d from %dms to %dms", i, dur, MAX_FRAME_DURATION_MS)
             dur = MAX_FRAME_DURATION_MS
         if dur < MIN_FRAME_DURATION_MS:
-            logger.warning("Raising frame %d duration from %dms to %dms", i, dur, MIN_FRAME_DURATION_MS)
+            logger.warning("Raising frame %d from %dms to %dms", i, dur, MIN_FRAME_DURATION_MS)
             dur = MIN_FRAME_DURATION_MS
         durations.append(dur)
 
     total_dur = sum(durations)
     if total_dur > MAX_TOTAL_ANIMATION_MS:
         scale = MAX_TOTAL_ANIMATION_MS / total_dur
-        logger.warning("Total animation %dms exceeds %dms, scaling durations by %.2f",
-                       total_dur, MAX_TOTAL_ANIMATION_MS, scale)
+        logger.warning(
+            "Total animation %dms exceeds %dms, scaling durations by %.2f",
+            total_dur,
+            MAX_TOTAL_ANIMATION_MS,
+            scale,
+        )
         durations = [max(8, int(d * scale)) for d in durations]
 
     quality = 85
@@ -65,8 +71,13 @@ def _animated_to_webp(img: Image.Image) -> bytes:
         buf = BytesIO()
         try:
             frames[0].save(
-                buf, "WEBP", save_all=True, append_images=frames[1:],
-                quality=quality, duration=durations, loop=0,
+                buf,
+                "WEBP",
+                save_all=True,
+                append_images=frames[1:],
+                quality=quality,
+                duration=durations,
+                loop=0,
             )
         except Exception as e:
             raise ImageConversionError(f"Failed to encode animated WebP: {e}")
@@ -76,8 +87,13 @@ def _animated_to_webp(img: Image.Image) -> bytes:
 
     buf = BytesIO()
     frames[0].save(
-        buf, "WEBP", save_all=True, append_images=frames[1:],
-        quality=10, duration=durations, loop=0,
+        buf,
+        "WEBP",
+        save_all=True,
+        append_images=frames[1:],
+        quality=10,
+        duration=durations,
+        loop=0,
     )
     return buf.getvalue()
 
@@ -120,14 +136,14 @@ def _image_to_png(img: Image.Image) -> bytes:
     buf.seek(0)
     return buf.getvalue()
 
+
 def _image_to_bytes(img: Image.Image, fmt: str) -> bytes:
     buf = BytesIO()
     img.save(buf, fmt)
     return buf.getvalue()
 
 
-def create_pack(name: str, images: List[Path],
-                publisher: str) -> ProcessedPack:
+def create_pack(name: str, images: List[Path], publisher: str) -> ProcessedPack:
     pack_id = sanitize(name)
     logger.info("[%s] %s", pack_id, name)
 
@@ -161,9 +177,9 @@ def create_pack(name: str, images: List[Path],
         raise ImageConversionError(f"Failed to encode tray: {e}")
 
     logger.info("  tray.png")
-    return ProcessedPack(id=pack_id, name=name, publisher=publisher,
-                         stickers=sticker_imgs, tray=tray_png)
-
+    return ProcessedPack(
+        id=pack_id, name=name, publisher=publisher, stickers=sticker_imgs, tray=tray_png
+    )
 
 
 def pack_to_wastickers(pack: ProcessedPack) -> bytes:
@@ -175,7 +191,7 @@ def pack_to_wastickers(pack: ProcessedPack) -> bytes:
             zf.writestr("tray.png", pack.tray)
             for i, item in enumerate(pack.stickers):
                 if isinstance(item, bytes):
-                    zf.writestr(f"sticker_{i+1:02d}.webp", item)
+                    zf.writestr(f"sticker_{i + 1:02d}.webp", item)
     except OSError as e:
         raise StickerError(f"Failed to build ZIP for '{pack.name}': {e}")
 

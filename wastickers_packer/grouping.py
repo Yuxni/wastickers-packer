@@ -2,14 +2,13 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from .scan import scan, scan_subfolders
 from .exceptions import InputError
+from .scan import scan, scan_subfolders
 
 logger = logging.getLogger(__name__)
 
 MAX_PER_PACK = 30
 MIN_PER_PACK = 3
-
 
 
 def _display_name(raw: str) -> str:
@@ -40,7 +39,7 @@ def _split_flat(images: List[Path], base_name: str) -> Dict[str, List[Path]]:
 
     packs: Dict[str, List[Path]] = {}
     for i in range(0, count, MAX_PER_PACK):
-        chunk = images[i:i + MAX_PER_PACK]
+        chunk = images[i : i + MAX_PER_PACK]
         name = f"{base_name} {i // MAX_PER_PACK + 1}"
         packs[name] = chunk
     return packs

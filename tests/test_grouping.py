@@ -3,15 +3,14 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
+from wastickers_packer.exceptions import InputError
 from wastickers_packer.grouping import (
     _display_name,
     _split_flat,
     plan_packs,
 )
-from wastickers_packer.exceptions import InputError
 
 from .conftest import mock_path
-
 
 DISPLAY_NAME_CASES = [
     ("cute_animals", "Cute Animals"),
@@ -76,9 +75,7 @@ class TestPlanPacks:
 
     @patch("wastickers_packer.grouping.scan_subfolders")
     @patch("wastickers_packer.grouping.scan")
-    def test_flat_mode_without_name_uses_folder_name(
-        self, mock_scan, mock_subfolders
-    ) -> None:
+    def test_flat_mode_without_name_uses_folder_name(self, mock_scan, mock_subfolders) -> None:
         mock_subfolders.return_value = []
         mock_scan.return_value = _paths(4)
 
@@ -91,9 +88,7 @@ class TestPlanPacks:
 
     @patch("wastickers_packer.grouping.scan_subfolders")
     @patch("wastickers_packer.grouping.scan")
-    def test_flat_mode_with_custom_name(
-        self, mock_scan, mock_subfolders
-    ) -> None:
+    def test_flat_mode_with_custom_name(self, mock_scan, mock_subfolders) -> None:
         mock_subfolders.return_value = []
         mock_scan.return_value = _paths(4)
 
@@ -103,9 +98,7 @@ class TestPlanPacks:
 
     @patch("wastickers_packer.grouping.scan_subfolders")
     @patch("wastickers_packer.grouping.scan")
-    def test_raises_on_empty_input(
-        self, mock_scan, mock_subfolders
-    ) -> None:
+    def test_raises_on_empty_input(self, mock_scan, mock_subfolders) -> None:
         mock_subfolders.return_value = []
         mock_scan.return_value = []
 
@@ -136,8 +129,10 @@ class TestPlanPacks:
     def test_subfolder_allows_mixed_content(self, mock_subfolders) -> None:
         """Mixed static/animated in a subfolder is now allowed."""
         mock_subfolders.return_value = [
-            ("Mixed", [mock_path("a.webp"), mock_path("b.webp"),
-                       mock_path("c.png"), mock_path("d.png")]),
+            (
+                "Mixed",
+                [mock_path("a.webp"), mock_path("b.webp"), mock_path("c.png"), mock_path("d.png")],
+            ),
         ]
 
         packs = plan_packs(MagicMock(spec=Path))

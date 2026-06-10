@@ -7,4 +7,5 @@ build/
 .venv/
 output/
 .pytest_cache/
+.coverage
 *.spec

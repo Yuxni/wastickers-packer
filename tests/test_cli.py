@@ -23,6 +23,7 @@ class TestCli:
         old_argv, sys.argv = sys.argv, ["wastickers-packer", "/fake/input", "-o", "/fake/output"]
         try:
             from wastickers_packer.cli import cli
+
             cli()
             mock_plan.assert_called_once()
             mock_create.assert_called_once()
@@ -44,9 +45,13 @@ class TestCli:
         mock_create.return_value = MagicMock(id="pack", name="Pack")
         mock_p2w.return_value = b"zip"
 
-        old_argv, sys.argv = sys.argv, ["wastickers-packer", "/fake/input", "-o", "/fake/output", "--report"]
+        old_argv, sys.argv = (
+            sys.argv,
+            ["wastickers-packer", "/fake/input", "-o", "/fake/output", "--report"],
+        )
         try:
             from wastickers_packer.cli import cli
+
             cli()
             mock_idx.assert_called_once()
         finally:
@@ -65,12 +70,20 @@ class TestCli:
         mock_create.return_value = MagicMock(id="pack", name="Pack")
         mock_p2w.return_value = b"zip"
 
-        old_argv, sys.argv = sys.argv, [
-            "wastickers-packer", "/fake/input", "-o", "/fake/output",
-            "--publisher", "CustomPub",
-        ]
+        old_argv, sys.argv = (
+            sys.argv,
+            [
+                "wastickers-packer",
+                "/fake/input",
+                "-o",
+                "/fake/output",
+                "--publisher",
+                "CustomPub",
+            ],
+        )
         try:
             from wastickers_packer.cli import cli
+
             cli()
             _, kwargs = mock_create.call_args
             assert kwargs["publisher"] == "CustomPub"
@@ -82,6 +95,7 @@ class TestCli:
         old_argv, sys.argv = sys.argv, ["wastickers-packer", "/nonexistent/path"]
         try:
             from wastickers_packer.cli import cli
+
             with pytest.raises(SystemExit) as exc:
                 cli()
             assert exc.value.code == 1
@@ -93,6 +107,7 @@ class TestCli:
         old_argv, sys.argv = sys.argv, ["wastickers-packer", "/fake/file.txt"]
         try:
             from wastickers_packer.cli import cli
+
             with pytest.raises(SystemExit) as exc:
                 cli()
             assert exc.value.code == 1

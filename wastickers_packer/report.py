@@ -2,13 +2,13 @@ from io import BytesIO
 from pathlib import Path
 from typing import List
 
-from PIL import Image
-
 from .wastickers import ProcessedPack
 
 
 def _esc(text: str) -> str:
-    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+    return (
+        text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+    )
 
 
 def write_index(output_dir: Path, packs: List[ProcessedPack]) -> None:
@@ -23,13 +23,13 @@ def write_index(output_dir: Path, packs: List[ProcessedPack]) -> None:
         thumbs = ""
         for i, sticker in enumerate(p.stickers):
             if isinstance(sticker, bytes):
-                (pack_dir / f"sticker_{i+1:02d}.webp").write_bytes(sticker)
-                thumbs += f'<img src="{p.id}/sticker_{i+1:02d}.webp" alt="">\n'
+                (pack_dir / f"sticker_{i + 1:02d}.webp").write_bytes(sticker)
+                thumbs += f'<img src="{p.id}/sticker_{i + 1:02d}.webp" alt="">\n'
             else:
                 buf = BytesIO()
                 sticker.save(buf, "PNG")
-                (pack_dir / f"sticker_{i+1:02d}.png").write_bytes(buf.getvalue())
-                thumbs += f'<img src="{p.id}/sticker_{i+1:02d}.png" alt="">\n'
+                (pack_dir / f"sticker_{i + 1:02d}.png").write_bytes(buf.getvalue())
+                thumbs += f'<img src="{p.id}/sticker_{i + 1:02d}.png" alt="">\n'
 
         cards += f"""<div class="card">
   <div class="card-header">
@@ -51,7 +51,8 @@ def write_index(output_dir: Path, packs: List[ProcessedPack]) -> None:
 <title>Sticker Packs</title>
 <style>
 * {{margin:0;padding:0;box-sizing:border-box}}
-body {{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0d1418;color:#e9edef;padding:24px}}
+body {{font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+       background:#0d1418;color:#e9edef;padding:24px}}
 .container {{max-width:520px;margin:0 auto}}
 h1 {{font-size:24px;margin-bottom:24px}}
 .card {{background:#182229;border-radius:16px;padding:16px;margin-bottom:16px}}

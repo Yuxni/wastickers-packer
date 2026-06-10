@@ -8,8 +8,8 @@ Usage:
 import argparse
 import logging
 import sys
-import time
 import tempfile
+import time
 from pathlib import Path
 
 # Ensure the project root is on sys.path when run directly
@@ -17,10 +17,10 @@ _project_root = Path(__file__).resolve().parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-from PIL import Image
+from PIL import Image  # noqa: E402
 
-from wastickers_packer.grouping import plan_packs
-from wastickers_packer.wastickers import create_pack, pack_to_wastickers
+from wastickers_packer.grouping import plan_packs  # noqa: E402
+from wastickers_packer.wastickers import create_pack, pack_to_wastickers  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("bench")
@@ -40,9 +40,12 @@ def make_animated(n_frames, width=512, height=512):
         frames.append(frame)
     buf = tempfile.SpooledTemporaryFile()
     frames[0].save(
-        buf, "GIF", save_all=True,
+        buf,
+        "GIF",
+        save_all=True,
         append_images=frames[1:],
-        duration=100, loop=0,
+        duration=100,
+        loop=0,
     )
     buf.seek(0)
     return buf.read()
@@ -73,10 +76,13 @@ def bench(name, images_dir, *, label=None):
         processed = create_pack(pack_name, pack_images, publisher="bench")
         t3 = time.perf_counter()
         wastickers = pack_to_wastickers(processed)
-        t4 = time.perf_counter()
-        logger.info("  convert: %6.2fs  (%s, %d stickers, %.1f KB)",
-                     t3 - t2, pack_name, len(pack_images),
-                     len(wastickers) / 1024)
+        logger.info(
+            "  convert: %6.2fs  (%s, %d stickers, %.1f KB)",
+            t3 - t2,
+            pack_name,
+            len(pack_images),
+            len(wastickers) / 1024,
+        )
 
 
 def main():

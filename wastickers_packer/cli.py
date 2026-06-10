@@ -2,10 +2,10 @@ import logging
 import sys
 from pathlib import Path
 
-from .grouping import plan_packs
-from .wastickers import create_pack, pack_to_wastickers
-from .report import write_index
 from .exceptions import StickerError
+from .grouping import plan_packs
+from .report import write_index
+from .wastickers import create_pack, pack_to_wastickers
 
 
 def _setup_logging() -> None:
@@ -20,19 +20,20 @@ def _setup_logging() -> None:
 
 def cli() -> None:
     import argparse
+
     ap = argparse.ArgumentParser(
         prog="wastickers-packer",
         description="Pack sticker images into .wastickers files for WhatsApp.",
     )
     ap.add_argument("input", help="Folder with sticker images or subdirectories")
-    ap.add_argument("-o", "--output", default="output",
-                    help="Output directory (default: output/)")
-    ap.add_argument("--publisher", default="WhatsApp Sticker Tool",
-                    help="Publisher name in metadata")
-    ap.add_argument("--name",
-                    help="Pack name (for flat folders without subdirectories)")
-    ap.add_argument("--report", action="store_true",
-                    help="Generate HTML preview page with tray icons")
+    ap.add_argument("-o", "--output", default="output", help="Output directory (default: output/)")
+    ap.add_argument(
+        "--publisher", default="WhatsApp Sticker Tool", help="Publisher name in metadata"
+    )
+    ap.add_argument("--name", help="Pack name (for flat folders without subdirectories)")
+    ap.add_argument(
+        "--report", action="store_true", help="Generate HTML preview page with tray icons"
+    )
 
     args = ap.parse_args()
     _setup_logging()
@@ -47,8 +48,10 @@ def cli() -> None:
     try:
         groupings = plan_packs(input_dir=input_dir, name=args.name)
 
-        packs = [create_pack(name, images, publisher=args.publisher)
-                 for name, images in groupings.items()]
+        packs = [
+            create_pack(name, images, publisher=args.publisher)
+            for name, images in groupings.items()
+        ]
 
         if not packs:
             logging.error("No valid packs generated.")

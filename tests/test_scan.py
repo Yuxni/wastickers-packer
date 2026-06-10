@@ -7,10 +7,10 @@ from wastickers_packer.scan import is_animated, sanitize, scan, scan_subfolders
 
 from .conftest import mock_path
 
-
 # ---------------------------------------------------------------------------
 # is_animated()
 # ---------------------------------------------------------------------------
+
 
 class TestIsAnimated:
     @patch("wastickers_packer.scan.Image.open")
@@ -148,9 +148,7 @@ class TestScanSubfolders:
             mock_path("empty", is_file=False, is_dir=True),
         ]
 
-        mock_scan.side_effect = lambda p: (
-            [mock_path("a.png")] if p.name == "animals" else []
-        )
+        mock_scan.side_effect = lambda p: [mock_path("a.png")] if p.name == "animals" else []
 
         entries = scan_subfolders(root)
 
