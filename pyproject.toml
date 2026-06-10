@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wastickers-packer"
-version = "0.1.0"
+version = "0.1.1"
 description = "Batch-pack sticker images into .wastickers files for WhatsApp — auto-resize, split, pad, and generate installable packs"
 readme = "README.md"
 requires-python = ">=3.8"
