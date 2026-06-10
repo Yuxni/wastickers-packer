@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Batch-pack sticker images into .wastickers files for WhatsApp — auto-resize, split, pad, and generate installable packs"
 readme = "README.md"
 requires-python = ">=3.8"
-license = "MIT"
+license = {text = "MIT"}
 authors = [
     {name = "yuxni"},
 ]
